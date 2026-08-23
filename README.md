@@ -1,4 +1,4 @@
-# Diagnosing a DAU Drop — A Root-Cause Investigation
+# Diagnosing a DAU Drop - A Root-Cause Investigation
 
 **A structured, end-to-end investigation of a 5.6% daily active user decline, in the format used in analyst case-study interviews at companies like Meta, Google, and Amazon: confirm the metric moved, segment to isolate where, decompose to quantify how much, drill down to find the mechanism, and recommend a fix.**
 
