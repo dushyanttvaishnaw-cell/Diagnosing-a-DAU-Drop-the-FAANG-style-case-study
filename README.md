@@ -2,13 +2,13 @@
 
 **A structured, end-to-end investigation of a 5.6% daily active user decline, in the format used in analyst case-study interviews at companies like Meta, Google, and Amazon: confirm the metric moved, segment to isolate where, decompose to quantify how much, drill down to find the mechanism, and recommend a fix.**
 
-This project deliberately does **not** start by revealing the root cause. It walks the same investigative sequence a live "your DAU dropped 5% last week — what happened?" interview question expects, using only what each step's data actually shows to decide the next step.
+This project deliberately does **not** start by revealing the root cause. It walks the same investigative sequence a live "your DAU dropped 5% last week - what happened?" interview question expects, using only what each step's data actually shows to decide the next step.
 
 ---
 
 ## The Investigation
 
-### Step 1 — Confirm the drop is real
+### Step 1 - Confirm the drop is real
 Comparing the two weeks before and after Aug 15, 2025:
 
 | Period | Avg DAU |
@@ -21,7 +21,7 @@ Beyond normal week-to-week noise. Confirmed real, worth investigating further.
 
 ![Overall DAU Trend](outputs/01_overall_dau_trend.png)
 
-### Step 2 — Segment to find where it concentrates
+### Step 2 - Segment to find where it concentrates
 Breaking the same before/after comparison out by platform immediately isolates the problem:
 
 | Platform | Pre DAU | Post DAU | Change |
@@ -34,12 +34,12 @@ Android and Web both grew modestly over the same window. The entire company-wide
 
 ![DAU by Platform](outputs/02_dau_by_platform.png)
 
-### Step 3 — Decompose contribution to the total drop
-iOS's standalone decline (3,195 users/day) is actually **larger** than the net company-wide drop, because Android and Web partially offset it. iOS is not just "the biggest factor" — it's the entire story.
+### Step 3 - Decompose contribution to the total drop
+iOS's standalone decline (3,195 users/day) is actually **larger** than the net company-wide drop, because Android and Web partially offset it. iOS is not just "the biggest factor" - it's the entire story.
 
 ![Contribution by Platform](outputs/03_drop_contribution_by_platform.png)
 
-### Step 4 — Drill into iOS: segment by app version
+### Step 4 - Drill into iOS: segment by app version
 Splitting iOS traffic by app version in the post-period reveals the mechanism immediately:
 
 | App Version | Successful Logins | Failed Logins | Failure Rate |
@@ -51,13 +51,13 @@ Version 4.1 has a clean 0% failure rate throughout. Version 4.2 shows a **33.9% 
 
 ![Failure Rate by Version](outputs/04_failure_rate_by_version.png)
 
-### Step 5 — Quantify the impact
+### Step 5 - Quantify the impact
 - Average failed login sessions/day in the post-period: **3,594**
 - Average iOS DAU decline vs. pre-period: **3,195**
 
-These two independently-derived numbers are close enough to confirm the v4.2 login bug is the direct, near-complete explanation for the iOS decline — not a coincidental correlation.
+These two independently-derived numbers are close enough to confirm the v4.2 login bug is the direct, near-complete explanation for the iOS decline - not a coincidental correlation.
 
-### Step 6 — Rule out confounds
+### Step 6 - Rule out confounds
 Before concluding, check whether the failure rate is uniform across country (which would point to a client-side bug) or concentrated in specific regions (which would suggest a server/localization/regional infrastructure issue instead):
 
 | Country | Failure Rate |
@@ -74,18 +74,18 @@ Uniform across all five countries. This rules out a regional server or localizat
 
 ## Conclusion & Recommendation
 
-**Root cause:** A login-failure bug shipped in iOS app version 4.2, causing ~34% of login attempts on that version to fail starting Aug 15 — coinciding with a server-side configuration change that triggered previously-dormant client code (a realistic pattern: the bug shipped with the version, but a separate trigger activated it days later).
+**Root cause:** A login-failure bug shipped in iOS app version 4.2, causing ~34% of login attempts on that version to fail starting Aug 15 - coinciding with a server-side configuration change that triggered previously-dormant client code (a realistic pattern: the bug shipped with the version, but a separate trigger activated it days later).
 
 **Recommendation:**
 1. **Immediate:** Force a server-side rollback of the Aug 15 config change, or ship an expedited 4.2.1 patch and force-update affected users.
-2. **Process:** This bug was invisible in an aggregate DAU dashboard for days — segmenting by platform and version should be a standard, automated check (not a manual drill-down) triggered whenever the top-line metric moves more than 2-3%.
+2. **Process:** This bug was invisible in an aggregate DAU dashboard for days - segmenting by platform and version should be a standard, automated check (not a manual drill-down) triggered whenever the top-line metric moves more than 2-3%.
 3. **Monitoring:** Add a login-failure-rate alert, segmented by app version, so a spike like this pages someone within hours instead of surfacing as a lagging DAU decline days later.
 
 ---
 
 ## Data
 
-Synthetic 120-day session-level dataset (`src/generate_data.py`) for a consumer app, with a deliberately injected root cause (the v4.2 login bug) that the analysis scripts do not have prior knowledge of — the investigation script (`src/investigate.py`) discovers it the same way a real analyst would, by following the data.
+Synthetic 120-day session-level dataset (`src/generate_data.py`) for a consumer app, with a deliberately injected root cause (the v4.2 login bug) that the analysis scripts do not have prior knowledge of - the investigation script (`src/investigate.py`) discovers it the same way a real analyst would, by following the data.
 
 | Column | Description |
 |---|---|
